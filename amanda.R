@@ -60,7 +60,8 @@ db_lncrna %>%
   geom_xsidehistogram(data = coverage,
                       aes(x = pos),
                       binwidth = 5,
-                      inherit.aes = F) +
+                      inherit.aes = F,
+                      fill = "dodgerblue") +
   new_scale_fill() +
   geom_gene_arrow(data = db_mirna,
                   aes(xmin = start, xmax = end,
