@@ -1,6 +1,7 @@
 library(tidyverse)
 library(gggenes)
 library(ggnewscale)
+library(ggside)
 
 db_amanda <- readxl::read_xlsx(path = "interacoes.xlsx",
                                col_names = T)
@@ -56,6 +57,10 @@ db_lncrna %>%
                          xsubmin = int_start, xsubmax = int_end),
                      fill = "dodgerblue",
                      color="black", alpha=.4) +
+  geom_xsidehistogram(data = coverage,
+                      aes(x = pos),
+                      binwidth = 5,
+                      inherit.aes = F) +
   new_scale_fill() +
   geom_gene_arrow(data = db_mirna,
                   aes(xmin = start, xmax = end,
@@ -73,14 +78,16 @@ db_lncrna %>%
   scale_fill_gradient(low = "red",high = "white",
                       limits = c(min(db_amanda$int),0)) +
   #theme_genes() +
-  labs(y = "") +
+  labs(y = "",x = "") +
   theme(legend.position = "bottom",
         line = element_blank(),
         panel.grid.major.y = element_line(linewidth = .05,colour = "grey50"),
-        panel.background = element_rect(fill = "white"))
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
   
 ggsave(filename = "coord_interactions.png",dpi = 600,bg = "white",
-       scale = 3)
+       width = 12,
+       height = 10)
 
 # db_lncrna %>% 
 #   ggplot(aes(xmin = start, xmax = end, y = molecule)) +
@@ -92,20 +99,33 @@ ggsave(filename = "coord_interactions.png",dpi = 600,bg = "white",
 #   theme_genes() +
 #   labs(y = "")
 
-db_mirna %>% 
-  ggplot(aes(xmin = start, xmax = end, y = mirna)) +
-  geom_gene_arrow(data = db_mirna,
-                  aes(xmin = start, xmax = end,
-                      y = molecule)) +
-  geom_subgene_arrow(data = db_mirna,
-                     aes(xmin = start, xmax = end,
-                         y = molecule,
-                         fill = `Binding Energy`,
-                         xsubmin = int_start, xsubmax = int_end)) + 
-  scale_y_discrete(expand = c(0,6)) +
-  theme_genes() +
-  labs(y = "")
+# db_mirna %>% 
+#   ggplot(aes(xmin = start, xmax = end, y = mirna)) +
+#   geom_gene_arrow(data = db_mirna,
+#                   aes(xmin = start, xmax = end,
+#                       y = molecule)) +
+#   geom_subgene_arrow(data = db_mirna,
+#                      aes(xmin = start, xmax = end,
+#                          y = molecule,
+#                          fill = `Binding Energy`,
+#                          xsubmin = int_start, xsubmax = int_end)) + 
+#   scale_y_discrete(expand = c(0,6)) +
+#   theme_genes() +
+#   labs(y = "")
 
+
+limits <- select(db_amanda,int_start,int_end)
+
+seq_pos <- list()
+for(i in 1:nrow(limits)){
+  
+  seq_pos[[i]] <- seq(limits$int_start[i],limits$int_end[i],1)
+}
+
+coverage <-
+  tibble(seq_pos) %>% 
+  unnest() %>% 
+  rename(pos = seq_pos)
 
 # Only mirs ---------------------------------------------------------------
 
